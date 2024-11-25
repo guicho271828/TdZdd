@@ -25,12 +25,24 @@ public:
         return n;
     }
 
+    // level -1 : terminal 1
+    // level 0 : terminal 0
     Level getChild(State& state, Level level, int value) const {
         state += value;
-        if (--level == 0) return (state == k) ? -1 : 0;
-        if (state > k) return 0;
-        if (state + level < k) return 0;
-        return level;
+	level--;
+
+        if (level == 0) {
+	    // terminal 1 if there are exactly k elements; 0 if less.
+	    return (state == k) ? -1 : 0;
+	} else if (state > k) {
+	    // if it has more than k elements, prune.
+	    return 0;
+	} else if (state + level < k) {
+	    // if there would not be enough remaining elements, it would not each k elements in the end, so prune.
+	    return 0;
+	} else {
+	    return level;
+	}
     }
 };
 
