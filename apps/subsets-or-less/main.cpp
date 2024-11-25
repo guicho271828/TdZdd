@@ -28,6 +28,7 @@ public:
     // level -1 : terminal 1
     // level 0 : terminal 0
     Level getChild(State& state, Level level, int value) const {
+	cout << "  parent l = " << level << ", parent s = " << state << ", value = " << value << endl;
         state += value;
 	level--;
 
@@ -80,14 +81,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    cout << "generating spec" << endl;
     Subsets spec(n, k);
     ofstream os1(to_string(n) + "-" + to_string(k) + "-spec.dot");
     spec.dumpDot(os1);
 
+    cout << "generating dd" << endl;
     DdStructure<2> dd(spec);
     ofstream os2(to_string(n) + "-" + to_string(k) + "-dd-before-reduced.dot");
     dd.dumpDot(os2);
 
+    cout << "reducing dd" << endl;
     dd.zddReduce();
     ofstream os3(to_string(n) + "-" + to_string(k) + "-dd-after-reduced.dot");
     dd.dumpDot(os3);
