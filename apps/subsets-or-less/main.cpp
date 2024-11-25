@@ -33,16 +33,19 @@ public:
 	level--;
 
         if (level == 0) {
-	    // terminal 1 if there are exactly k elements; 0 if less.
-	    return (state == k) ? -1 : 0;
-	} else if (state > k) {
-	    // if it has more than k elements, prune.
-	    return 0;
-	} else if (state + level < k) {
-	    // if there would not be enough remaining elements, it would not each k elements in the end, so prune.
-	    return 0;
+	    if (state > k) {
+		// if it has more than k elements, prune.
+		return 0;
+	    } else {
+		return -1;
+	    }
 	} else {
-	    return level;
+	    if (state > k) {
+		// if it has more than k elements, prune.
+		return 0;
+	    } else {
+		return level;
+	    }
 	}
     }
 };
