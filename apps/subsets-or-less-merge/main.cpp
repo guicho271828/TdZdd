@@ -37,12 +37,12 @@ class Subsets: public DdSpec<Subsets,TupleSize,2> {
 public:
     Subsets(PropositionalState s, int k)
 	: s(s), k(k) {
-	cout << "instantiating spec" << endl;
-	cout << s << endl;
+	// cout << "instantiating spec" << endl;
+	// cout << s << endl;
     }
 
     Level getRoot(TupleSize& size) const {
-	cout << "generating dd for s = " << s << ", k = " << k << endl;
+	// cout << "generating dd for s = " << s << ", k = " << k << endl;
         size = 0;
         return s.size();
     }
@@ -51,7 +51,7 @@ public:
     // level 0 : terminal 0
     Level getChild(TupleSize& size, Level plevel, int value) const {
 
-	cout << "  parent l = " << plevel << ", parent s = " << size << ", value = " << value << endl;
+	// cout << "  parent l = " << plevel << ", parent s = " << size << ", value = " << value << endl;
 
 	if (s[plevel-1] == false){
 	    // the proposition is false.
