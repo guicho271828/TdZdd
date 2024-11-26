@@ -1,7 +1,7 @@
 
 #include <string>
-#include <sstream>
 #include <fstream>
+#include <chrono>
 
 #include <tdzdd/DdStructure.hpp>
 #include <tdzdd/DdSpecOp.hpp>
@@ -163,13 +163,35 @@ int main(int argc, char *argv[]) {
     dd3.zddReduce();
     dd4.zddReduce();
 
-    auto spec12 = zddUnion(dd1,dd2);
-    auto spec34 = zddUnion(dd3,dd4);
-    DdStructure<2> dd12(spec12);
-    DdStructure<2> dd34(spec34);
+    cout << "computing the union between dd1 and dd2" << endl;
 
+    auto start12 = std::chrono::high_resolution_clock::now();
+    auto spec12 = zddUnion(dd1,dd2);
+    DdStructure<2> dd12(spec12);
     dd12.zddReduce();
+    auto end12 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration12 = end12 - start12;
+
+    cout << "computing the union between dd3 and dd2" << endl;
+
+    auto start34 = std::chrono::high_resolution_clock::now();
+    auto spec34 = zddUnion(dd3,dd4);
+    DdStructure<2> dd34(spec34);
     dd34.zddReduce();
+    auto end34 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration34 = end34 - start34;
+
+    std::cout << "Runtime [sec]: "
+	      << duration12.count()
+	      << " vs. "
+	      << duration34.count()
+	      << " "
+	      << duration12.count() / duration34.count()
+	      << " speedup on "
+	      << " k = " << k
+	      << " n = " << n
+	      << std::endl;
+
 
     dump(dd1, to_string(n) + "-" + to_string(k) + "-dd1.dot");
     dump(dd2, to_string(n) + "-" + to_string(k) + "-dd2.dot");

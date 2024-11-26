@@ -21,7 +21,14 @@ all: \
 	7-3-dd3.pdf \
 	7-3-dd4.pdf \
 	7-3-dd12.pdf \
-	7-3-dd34.pdf
+	7-3-dd34.pdf \
+	100-3-dd1.pdf \
+	100-3-dd2.pdf \
+	100-3-dd3.pdf \
+	100-3-dd4.pdf \
+	100-3-dd12.pdf \
+	100-3-dd34.pdf
+
 
 
 %.pdf: %.dot
