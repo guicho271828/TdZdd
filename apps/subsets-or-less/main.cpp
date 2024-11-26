@@ -8,10 +8,10 @@
 using namespace tdzdd;
 using namespace std;
 
-using State = int;
+using TupleSize = int;
 using Level = int;
 
-class Subsets: public DdSpec<Subsets,State,2> {
+class Subsets: public DdSpec<Subsets,TupleSize,2> {
     int const n;
     int const k;
 
@@ -20,27 +20,27 @@ public:
             : n(n), k(k) {
     }
 
-    Level getRoot(State& state) const {
-        state = 0;
+    Level getRoot(TupleSize& size) const {
+        size = 0;
         return n;
     }
 
     // level -1 : terminal 1
     // level 0 : terminal 0
-    Level getChild(State& state, Level level, int value) const {
-	cout << "  parent l = " << level << ", parent s = " << state << ", value = " << value << endl;
-        state += value;
+    Level getChild(TupleSize& size, Level level, int value) const {
+	cout << "  parent l = " << level << ", parent s = " << size << ", value = " << value << endl;
+        size += value;
 	level--;
 
         if (level == 0) {
-	    if (state > k) {
+	    if (size > k) {
 		// if it has more than k elements, prune.
 		return 0;
 	    } else {
 		return -1;
 	    }
 	} else {
-	    if (state > k) {
+	    if (size > k) {
 		// if it has more than k elements, prune.
 		return 0;
 	    } else {
