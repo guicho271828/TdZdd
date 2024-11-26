@@ -16,9 +16,13 @@ OBJS     = $(SRCS:%.cpp=%.o)
 .PONY: all debug clean depend
 
 all: \
-	7-3-spec.pdf \
-	7-3-dd-before-reduced.pdf \
-	7-3-dd-after-reduced.pdf
+	7-3-dd1.pdf \
+	7-3-dd2.pdf \
+	7-3-dd3.pdf \
+	7-3-dd4.pdf \
+	7-3-dd12.pdf \
+	7-3-dd34.pdf
+
 
 %.pdf: %.dot
 	dot -Tpdf $< -o $@

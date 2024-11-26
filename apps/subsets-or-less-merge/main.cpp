@@ -4,47 +4,96 @@
 #include <fstream>
 
 #include <tdzdd/DdStructure.hpp>
+#include <tdzdd/DdSpecOp.hpp>
 
 using namespace tdzdd;
 using namespace std;
 
 using TupleSize = int;
 using Level = int;
+using PropositionalState = vector<bool>;
 
-class Subsets: public tdzdd::DdSpec<Subsets,TupleSize,2> {
-    int const n;
+
+template<class T>
+ostream& operator<<(ostream& os, const vector<T> &v){
+    os << "[";
+    bool first = true;
+    for (const T &elem : v){
+	if (first) {
+	    first = false;
+	} else {
+	    os << ", ";
+	}
+	os << elem;
+    }
+    os << "]";
+    return os;
+}
+
+class Subsets: public DdSpec<Subsets,TupleSize,2> {
+    PropositionalState const s;
     int const k;
 
 public:
-    Subsets(int n, int k)
-            : n(n), k(k) {
+    Subsets(PropositionalState s, int k)
+	: s(s), k(k) {
+	cout << "instantiating spec" << endl;
+	cout << s << endl;
     }
 
     Level getRoot(TupleSize& size) const {
+	cout << "generating dd for s = " << s << ", k = " << k << endl;
         size = 0;
-        return n;
+        return s.size();
     }
 
     // level -1 : terminal 1
     // level 0 : terminal 0
-    Level getChild(TupleSize& size, Level level, int value) const {
-	cout << "  parent l = " << level << ", parent s = " << size << ", value = " << value << endl;
-        size += value;
-	level--;
+    Level getChild(TupleSize& size, Level plevel, int value) const {
 
-        if (level == 0) {
-	    if (size > k) {
-		// if it has more than k elements, prune.
+	cout << "  parent l = " << plevel << ", parent s = " << size << ", value = " << value << endl;
+
+	if (s[plevel-1] == false){
+	    // the proposition is false.
+	    if (value == 1){
+		// not possible to add.
 		return 0;
-	    } else {
-		return -1;
+	    } else {		// value = 0
+		Level level = plevel - 1;
+		if (level == 0) {
+		    if (size > k) {
+			// if it has more than k elements, prune.
+			return 0;
+		    } else {
+			return -1;
+		    }
+		} else {
+		    if (size > k) {
+			// if it has more than k elements, prune.
+			return 0;
+		    } else {
+			return level;
+		    }
+		}
 	    }
-	} else {
-	    if (size > k) {
-		// if it has more than k elements, prune.
-		return 0;
+	} else {		// s[plevel-1] == true
+	    // since the proposition does exist, we can choose to add it or ignore it
+	    size += value;
+	    Level level = plevel - 1;
+	    if (level == 0) {
+		if (size > k) {
+		    // if it has more than k elements, prune.
+		    return 0;
+		} else {
+		    return -1;
+		}
 	    } else {
-		return level;
+		if (size > k) {
+		    // if it has more than k elements, prune.
+		    return 0;
+		} else {
+		    return level;
+		}
 	    }
 	}
     }
@@ -53,6 +102,12 @@ public:
 void usage(const char* programName) {
     cerr << "Usage: " << programName << " n k " << endl;
     cerr << "This program generates dot files for a ZDD containing all subsets of a set contianing 1..n whose size is less than k." << endl;
+}
+
+
+void dump(DdStructure<2> &dd, string filename){
+    ofstream os(filename);
+    dd.dumpDot(os);
 }
 
 int main(int argc, char *argv[]) {
@@ -84,20 +139,44 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    cout << "generating spec" << endl;
-    Subsets spec(n, k);
-    ofstream os1(to_string(n) + "-" + to_string(k) + "-spec.dot");
-    spec.dumpDot(os1);
+    PropositionalState s1(n, true);
+    PropositionalState s2(n, true);
+    PropositionalState s3(n, true);
+    PropositionalState s4(n, true);
+    s1[0] = false;
+    s2[1] = false;
+    s3[n-1] = false;
+    s4[n-2] = false;
 
-    cout << "generating dd" << endl;
-    DdStructure<2> dd(spec);
-    ofstream os2(to_string(n) + "-" + to_string(k) + "-dd-before-reduced.dot");
-    dd.dumpDot(os2);
+    Subsets spec1(s1, k);
+    Subsets spec2(s2, k);
+    Subsets spec3(s3, k);
+    Subsets spec4(s4, k);
 
-    cout << "reducing dd" << endl;
-    dd.zddReduce();
-    ofstream os3(to_string(n) + "-" + to_string(k) + "-dd-after-reduced.dot");
-    dd.dumpDot(os3);
+    DdStructure<2> dd1(spec1);
+    DdStructure<2> dd2(spec2);
+    DdStructure<2> dd3(spec3);
+    DdStructure<2> dd4(spec4);
+
+    dd1.zddReduce();
+    dd2.zddReduce();
+    dd3.zddReduce();
+    dd4.zddReduce();
+
+    auto spec12 = zddUnion(dd1,dd2);
+    auto spec34 = zddUnion(dd3,dd4);
+    DdStructure<2> dd12(spec12);
+    DdStructure<2> dd34(spec34);
+
+    dd12.zddReduce();
+    dd34.zddReduce();
+
+    dump(dd1, to_string(n) + "-" + to_string(k) + "-dd1.dot");
+    dump(dd2, to_string(n) + "-" + to_string(k) + "-dd2.dot");
+    dump(dd3, to_string(n) + "-" + to_string(k) + "-dd3.dot");
+    dump(dd4, to_string(n) + "-" + to_string(k) + "-dd4.dot");
+    dump(dd12, to_string(n) + "-" + to_string(k) + "-dd12.dot");
+    dump(dd34, to_string(n) + "-" + to_string(k) + "-dd34.dot");
 
     return 0;
 }
